@@ -27,6 +27,6 @@ Now, if you run `smol make config`, this will copy this template into `config/th
 
 # Accessing Config
 
-To access configuration data, use `smol.config(configName)` function. Example, if you were to create the above theme configuration, you can access it with `themeConfig = smol.config('theme')`.
+To access configuration data, use `smol.config(configName)` function. Example, if you were to create the above theme configuration, you can access it with `let themeConfig = smol.config('theme')`.
 
 Using a function like this rather than directly requiring the file allows smol to fall back to the default configuration file if none is present.
