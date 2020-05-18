@@ -1,0 +1,6 @@
+{
+  "mode": "development",
+  "appName": "App",
+  "historyPath": "storage/console/history",
+  "editor": "atom"
+}
