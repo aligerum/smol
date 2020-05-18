@@ -2,7 +2,7 @@
 
 Configuration files are in json format and are stored in config/. Each core has its own configuration by name (for example, if you have an express core called "api", it will pull its configuration from `config/api.json`).
 
-To generate the config files during deployment or development, run `smol make config` (see make config command documentation).
+To generate the config files during deployment or development, run `smol make config` (see make config command documentation). For information about each core's configuration, see that core's config documentation.
 
 You also have a configuration for the project for common things like app name, development mode, etc. that are stored in `config/smol.json`.
 
@@ -11,7 +11,6 @@ You also have a configuration for the project for common things like app name, d
 Your project will also need project-specific configuration. Any files placed in `template/` that end in `config.json` are considered config files and will be copied into `config/` when you run `smol make config`.
 
 For example, let's make a system that has a theme.config.json.
-
 
 template/theme.config.json:
 
