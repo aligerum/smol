@@ -1,9 +1,14 @@
 const config = require('../script/config')
 const fs = require('fs')
 
+let names = []
+if (fs.existsSync(`${process.cwd()}/core`)) names = names.concat(fs.readdirSync(`${process.cwd()}/core`))
+if (fs.existsSync(`${process.cwd()}/template`)) names = names.concat(fs.readdirSync(`${process.cwd()}/template`).filter(item => item.match(/\.config\.json$/)).map(item => item.replace('.config.json', '')))
+
 module.exports = {
   description: 'Make config files from templates',
   args: [
+    `template?=${names.sort().join(',')}: Name of config file to create\nIf none specified, will make all configs`,
     '-e,--edit: Open configs in editor',
     '-f,--force: Overwrite existing configs'
   ],
@@ -11,12 +16,13 @@ module.exports = {
 
     // get smol config
     let files = []
-    files.push({from: `${__dirname}/../template/config.json`, to: 'smol.json'})
+    if (!command.args.template || command.args.template == 'smol') files.push({from: `${__dirname}/../template/config.json`, to: 'smol.json'})
 
     // get core configs
     let cores = []
     if (fs.existsSync(`${process.cwd()}/core`)) cores = fs.readdirSync(`${process.cwd()}/core`)
     for (let core of cores) {
+      if (command.args.template && command.args.template != core) continue
       let coreJson = require(`${process.cwd()}/core/${core}/core.json`)
       let configPath = `${__dirname}/../../${coreJson.type}/template/config.json`
       if (fs.existsSync(configPath)) files.push({from: configPath, to: `${core}.json`})
@@ -25,7 +31,10 @@ module.exports = {
     // get custom configs
     if (fs.existsSync(`${process.cwd()}/template`)) {
       let configTemplates = fs.readdirSync(`${process.cwd()}/template`).filter(item => item.match(/\.config\.json$/))
-      for (let configTemplate of configTemplates) files.push({from: `${process.cwd()}/template/${configTemplate}`, to: `${configTemplate.replace('.config.json', '')}.json`})
+      for (let configTemplate of configTemplates) {
+        if (command.args.template && configTemplate.replace('.config.json', '') != command.args.template) continue
+        files.push({from: `${process.cwd()}/template/${configTemplate}`, to: `${configTemplate.replace('.config.json', '')}.json`})
+      }
     }
 
     // copy files

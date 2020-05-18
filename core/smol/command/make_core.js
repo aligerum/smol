@@ -26,5 +26,8 @@ module.exports = {
     // output
     console.log(command.colors.green(`Created ${command.args.type} core at core/${command.args.name}`))
 
+    // create config for core
+    command.run(`smol make config ${command.args.name}`)
+
   }
 }
