@@ -4,6 +4,9 @@ const fs = require('fs')
 // get list of cores
 let cores = fs.readdirSync(`${__dirname}/../..`).filter(core => core != 'smol')
 
+// get core types
+let coreTypes = Object.keys(commandScript.coreTypes).map(type => `${type}: ${commandScript.coreTypes[type]}`)
+
 module.exports = {
   args: [
     'command?+: Command to show help for',
@@ -95,7 +98,7 @@ module.exports = {
         if (tags.length) line += arg.description ? ` (${tags.join(', ')})` : `(${tags.join(', ')})`
         if (arg.allowedValues && arg.allowedValues.length) {
           if (arg.type == 'coreType' || (commandDef.argValues && commandDef.argValues[arg.name])) {
-            let values = arg.type == 'coreType' ? commandScript.coreTypes : commandDef.argValues[arg.name]
+            let values = arg.type == 'coreType' ? coreTypes : commandDef.argValues[arg.name]
             for (let val of values) line += `\n  ${''.padEnd(argNameLength, ' ')}    ${command.colors.dim(val.split(':')[0].padEnd(valNameLength, ' '))}  ${(val.split(':')[1] || '').trim()}`
           } else {
             line += `\n  ${''.padEnd(argNameLength, ' ')}    ${arg.allowedValues.map(val => command.colors.dim(val)).join(', ')}`
@@ -125,7 +128,7 @@ module.exports = {
         if (tags.length) line += option.description ? ` (${tags.join(', ')})` : `(${tags.join(', ')})`
         if (option.allowedValues && option.allowedValues.length) {
           if (option.type == 'coreType' || (commandDef.argValues && commandDef.argValues[option.name])) {
-            let values = option.type == 'coreType' ? commandScript.coreTypes : commandDef.argValues[option.name]
+            let values = option.type == 'coreType' ? coreTypes : commandDef.argValues[option.name]
             for (let val of values) line += `\n  ${''.padEnd(argNameLength, ' ')}    ${command.colors.dim(val.split(':')[0].padEnd(valNameLength, ' '))}  ${(val.split(':')[1] || '').trim()}`
           } else {
             line += `\n  ${''.padEnd(argNameLength, ' ')}    ${option.allowedValues.map(val => command.colors.dim(val)).join(', ')}`
