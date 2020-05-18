@@ -4,7 +4,7 @@ For this documentation, we'll create a custom greet command from scratch. (Note 
 
 # Creating the Command
 
-First, run `smol make greet`. This will create a `command/` directory and a `greet.js` file within it that looks like this:
+First, run `smol make command greet`. This will create a `command/` directory and a `greet.js` file within it that looks like this:
 
 ```js
 module.exports = {
@@ -53,7 +53,7 @@ exec: async command => {
 ```
 
 ```
-$ smol help greet
+$ smol greet
 Hello
 ```
 
@@ -152,7 +152,7 @@ Note: You can provide additional lines of help by adding line breaks (`\n`) to a
 
 # Greet Based on Time (Option Types)
 
-Now let's make it do a time-based greeting. For that, we'll provide a `--time` option they can set as a string. String options have an "=" sign after their name.
+Now let's make it do a time-based greeting. For that, we'll provide a `--time` option the user can set as a string. String options have an `=` sign after their name.
 
 ```js
 module.exports = {
@@ -250,7 +250,7 @@ $ smol greet Alice --time=bye
 bye is not a valid value for --time
 ```
 
-This is fine, and those values (morning, day, afternoon, evening) are pretty self-explanatory. But what if I have values that need some explanation?
+This is fine, and those values (morning, day, afternoon, evening) are pretty self-explanatory. But what if you have values that need some explanation?
 
 ```js
 module.exports = {
@@ -552,7 +552,7 @@ Hello, Alice
 Hello, Alice
 ```
 
-This could get out of hand if we allow any numbers, so we should make it so the number is less than say, 10.
+This could get out of hand if we allow any number, so we should make it so the number is less than say, 10.
 
 ```js
 args: [
@@ -760,19 +760,23 @@ exec: async command => {
 }
 ```
 
-Available colors: black, blue, cyan, green, magenta, red, yellow, white.
-Available styles: bright, dim, underline, blink, reverse, hidden.
+Available colors: `black`, `blue`, `cyan`, `green`, `magenta`, `red`, `yellow`, `white`.
+Available styles: `bright`, `dim`, `underline`, `blink`, `reverse`, `hidden`.
 
-Colors and styles can be mixed by putting the functions inside each other: `command.colors.red(command.colors.bright('Something went very wrong))`.
+Colors and styles can be mixed by putting the functions inside each other: `command.colors.red(command.colors.bright('Something went very wrong!'))`.
 
 # Run, Spawn
 
-Because it's a common need to run external programs from the command line, `run` and `spawn` function are provided. These are simply the `execSync` and `spawn` functions.
+Because it's a common need to run external programs from the command line, `run` and `spawn` function are provided. These are simply the `execSync` and `spawn` functions already provided by node's child_process object.
 
-Use `command.run` to run external scripts synchronously. You can pass in options as the second argument in the same way you can pass it into `execSync`. For example, `command.run('mkdir -p some/path', {stdio: 'ignore'})`.
+Use `command.run` to run external scripts synchronously. You can pass in and options object as the second argument in the same way you could pass it into `execSync`. For example, `command.run('mkdir -p some/path', {stdio: 'ignore'})`.
 
 Use `command.spawn` to create a subprocess that runs independently of the main process (returns the subprocess object returned by `child_process.spawn`). Unlike `child_process.spawn`, you can pass in arguments as a single string, rather than an array. For example: `command.spawn('watch -n1 dmesg')`.
 
 # Command Names
 
 Command names are generally single values, but there are instances in which you might want to create multi-value names. For example, the `make` command has the normal `make`, but also has `make config` and `make core`. These are two separate commands that take different arguments. They're recognized by the first parts of the command the user inputs being `smol make config` or `smol make core`. The more specific commands are matched first.
+
+To make a multi-value command name, use quotes or underscores, for example `smol make command do_stuff` and `smol make command "do stuff"` with both create `command/do_stuff.js` which will be called when you run `smol do stuff`.
+
+Having multi-value commands is useful for avoiding conflicts with existing commands and for adding custom arguments and options for specific commands.
