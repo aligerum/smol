@@ -641,7 +641,7 @@ $ smol make command size
 module.exports = {
   description: 'Get size of core',
   args: [
-    'core@: Core to compress'
+    'core@: Core to get size of'
   ],
   exec: async command => {
     console.log(`Size for ${command.args.core} (${command.info.core.type})`)
