@@ -148,6 +148,8 @@ $ smol greet Alice --smile
 Hello Alice :)
 ```
 
+Note: You can provide additional lines of help by adding line breaks (`\n`) to argument and option descriptions. New lines will automatically be indented properly.
+
 # Greet Based on Time (Option Types)
 
 Now let's make it do a time-based greeting. For that, we'll provide a `--time` option they can set as a string. String options have an "=" sign after their name.

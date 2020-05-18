@@ -91,11 +91,17 @@ module.exports = {
       console.log(command.colors.yellow('\nArguments'))
       for (let arg of argDefs.arguments) {
         let line = `  ${command.colors.green(arg.name.padEnd(argNameLength, ' '))}  `
-        if (arg.description) line += arg.description
+        let addedLines = []
+        if (arg.description) {
+          let lines = arg.description.split('\n')
+          line += lines.shift()
+          if (lines.length) addedLines = lines
+        }
         let tags = []
         if (arg.type != 'string') tags.push(arg.type)
         if (!arg.isRequired) tags.push('optional')
         if (tags.length) line += arg.description ? ` (${tags.join(', ')})` : `(${tags.join(', ')})`
+        if (addedLines.length) addedLines.forEach(addedLine => line += `\n${' '.repeat(argNameLength)}    ${addedLine}`)
         if (arg.allowedValues && arg.allowedValues.length) {
           if (arg.type == 'coreType' || (commandDef.argValues && commandDef.argValues[arg.name])) {
             let values = arg.type == 'coreType' ? coreTypes : commandDef.argValues[arg.name]
@@ -117,15 +123,21 @@ module.exports = {
       console.log(command.colors.yellow('\nOptions'))
       for (let option of orderedOptions) {
         let line = '  '
+        let addedLines = []
         if (option.isFlag && option.alias) line += command.colors.green(`-${option.name},--${option.alias}`.padEnd(argNameLength, ' '))
         else if (option.isFlag) line += command.colors.green(`-${option.name}`.padEnd(argNameLength, ' '))
         else line += command.colors.green(`--${option.name}`.padEnd(argNameLength, ' '))
         line += '  '
-        if (option.description) line += `${option.description}`
+        if (option.description) {
+          let lines = option.description.split('\n')
+          line += lines.shift()
+          if (lines.length) addedLines = lines
+        }
         let tags = []
         if (option.type != 'boolean') tags.push(option.type)
         if (option.isRequired) tags.push('required')
         if (tags.length) line += option.description ? ` (${tags.join(', ')})` : `(${tags.join(', ')})`
+        if (addedLines.length) addedLines.forEach(addedLine => line += `\n${' '.repeat(argNameLength)}    ${addedLine}`)
         if (option.allowedValues && option.allowedValues.length) {
           if (option.type == 'coreType' || (commandDef.argValues && commandDef.argValues[option.name])) {
             let values = option.type == 'coreType' ? coreTypes : commandDef.argValues[option.name]
