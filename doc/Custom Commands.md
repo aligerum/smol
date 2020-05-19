@@ -679,7 +679,7 @@ Core arguments and options are also available by name on the `command.info` obje
 | key | description | example |
 | --- | --- | --- |
 | path | path to core in project | /path/to/project/api |
-| prototypePath | path to smol's core prototype files | /path/to/project/node_modules/smol/core/express |
+| prototypePath | path to smol's core prototype files | /path/to/project/node_modules/smol-core-express |
 | type | type of core | express |
 
 You can also add `*` to argument and option names to make the argument a core type. This will validate inputs as one of the available core types (express, vue, mysql, etc.). Similarly to `@`, an `info` object will be available, but only `prototypePath` will be defined.

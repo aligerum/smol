@@ -1,3 +1,4 @@
+const commandScript = require('../script/command')
 const config = require('../script/config')
 const colors = require('../script/colors')
 const fs = require('fs')
@@ -22,7 +23,7 @@ module.exports = {
       let jsonPath = `${process.cwd()}/core/${core}/core.json`
       if (!fs.existsSync(jsonPath)) continue
       let coreJson = require(jsonPath)
-      let consolePath = `${__dirname}/../../${coreJson.type}/console.js`
+      let consolePath = `${commandScript.corePrototypes.find(corePrototype => corePrototype.name == coreJson.type).path}/console.js`
       if (!fs.existsSync(consolePath)) continue
       let coreLoader = require(consolePath)
       context[core] = {}

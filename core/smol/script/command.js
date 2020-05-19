@@ -1,12 +1,24 @@
 const child_process = require('child_process')
 const colors = require('./colors')
 const fs = require('fs')
+const string = require('./string')
 
-let coreTypes = {}
-fs.readdirSync(`${__dirname}/../..`).filter(core => core != 'smol').forEach(core => {
-  let json = require(`${__dirname}/../../${core}/core.json`)
-  coreTypes[core] = json.description
-})
+// determine core prototypes
+let corePrototypes = []
+let packageJson = require(`${process.cwd()}/package.json`)
+for (let jsonKey of ['dependencies', 'devDependencies']) {
+  if (packageJson[jsonKey]) {
+    corePrototypes = corePrototypes.concat(Object.keys(packageJson[jsonKey]).filter(key => key.startsWith('smol-core-')).map(key => {
+      return {name: key.slice(10), path: packageJson[jsonKey][key]}
+    }))
+  }
+}
+for (let corePrototype of corePrototypes) {
+  if (corePrototype.path.slice(0, 1) == '.') corePrototype.path = `${process.cwd()}/${corePrototype.path}`
+  if (corePrototype.path.slice(0, 1) != '/' && corePrototypePath.slice(1, 2) != ':') corePrototype.path = `${process.cwd()}/node_modules/${corePrototype.path}`
+  let coreJson = require(`${corePrototype.path}/core.json`)
+  corePrototype.description = coreJson.description
+}
 
 // run command
 let exec = async args => {
@@ -28,8 +40,9 @@ let exec = async args => {
     let commandName = args.slice(0, args.length - i).join('_')
     let paths = [
       `${process.cwd()}/command/${commandName}.js`,
-      `${__dirname}/../../${core}/command/${commandName}.js`,
     ]
+    if (core == 'smol') paths.push(`${__dirname}/../command/${commandName}.js`)
+    else paths.push(`${corePrototypes.find(type => type.name == core).path}/command/${commandName}.js`)
     for (let path of paths) {
       if (fs.existsSync(path)) {
         commandDef = require(path)
@@ -123,7 +136,7 @@ let parseArguments = (commandDef, inputArgs) => {
     if (def.match('!') && option.type != 'boolean') option.isRequired = true
     if (commandDef.argValues && commandDef.argValues[option.name]) option.allowedValues = commandDef.argValues[option.name].map(value => value.split(':')[0])
     else if (option.type == 'core') option.allowedValues = coreNames
-    else if (option.type == 'coreType') option.allowedValues = Object.keys(coreTypes)
+    else if (option.type == 'coreType') option.allowedValues = corePrototypes.map(type => type.name)
     else option.allowedValues = def.split('=')[1] ? def.split('=')[1].split(',') : []
     if (option.type == 'number') {
       let minMax = def.split('=')[1]
@@ -228,7 +241,7 @@ let parseArguments = (commandDef, inputArgs) => {
     if (def.match(/\*/)) argDef.type = 'coreType'
     if (commandDef.argValues && commandDef.argValues[argDef.name]) argDef.allowedValues = commandDef.argValues[argDef.name].map(value => value.split(':')[0])
     else if (argDef.type == 'core') argDef.allowedValues = coreNames
-    else if (argDef.type == 'coreType') argDef.allowedValues = Object.keys(coreTypes)
+    else if (argDef.type == 'coreType') argDef.allowedValues = corePrototypes.map(type => type.name)
     else argDef.allowedValues = def.split('=')[1] ? def.split('=')[1].split(',') : []
     if (argDef.type == 'number') {
       let minMax = def.split('=')[1]
@@ -324,12 +337,12 @@ let parseArguments = (commandDef, inputArgs) => {
       let coreJson = require(`${corePath}/core.json`)
       argDefs.info[argDef.name] = {
         path: corePath,
-        prototypePath: `${__dirname}/../../${coreJson.type}`,
+        prototypePath: corePrototypes.find(corePrototype => corePrototype.name == coreJson.type).path,
         type: coreJson.type,
       }
     } else if (argDef.type == 'coreType' && argDefs.values[argDef.name]) {
       argDefs.info[argDef.name] = {
-        prototypePath: `${__dirname}/../../${argDefs.values[argDef.name]}`,
+        prototypePath: corePrototypes.find(corePrototype => corePrototype.name == argDefs.values[argDef.name]).path,
       }
     }
   }
@@ -351,7 +364,7 @@ let spawn = command => {
 
 // export
 module.exports = {
-  coreTypes,
+  corePrototypes,
   exec,
   parseArguments,
 }

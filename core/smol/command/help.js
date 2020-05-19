@@ -1,11 +1,9 @@
 const commandScript = require('../script/command')
 const fs = require('fs')
 
-// get list of cores
-let cores = fs.readdirSync(`${__dirname}/../..`).filter(core => core != 'smol')
-
-// get core types
-let coreTypes = Object.keys(commandScript.coreTypes).map(type => `${type}: ${commandScript.coreTypes[type]}`)
+// get core types and names
+let coreTypes = commandScript.corePrototypes.map(type => `${type.name}: ${type.description}`)
+let cores = commandScript.corePrototypes.map(type => type.name)
 
 module.exports = {
   args: [
@@ -31,11 +29,11 @@ module.exports = {
         if (commandGroup.paths.length) commandGroups.push(commandGroup)
       }
       if (core) {
-        getCommands(require(`${__dirname}/../../${core}/core.json`).description + ` (${core})`, `${__dirname}/../../${core}/command`)
+        getCommands(`${commandScript.corePrototypes.find(type => type.name == core).description} (${core})`, `${commandScript.corePrototypes.find(type => type.name == core).path}/command`)
       } else {
         getCommands('Commands', __dirname)
         getCommands('Custom Commands', `${process.cwd()}/command`)
-        for (let core of cores) getCommands(require(`${__dirname}/../../${core}/core.json`).description + ` (${core})`, `${__dirname}/../../${core}/command`)
+        for (let core of cores) getCommands(`${commandScript.corePrototypes.find(type => type.name == core).description} (${core})`, `${commandScript.corePrototypes.find(type => type.name == core).path}/command`)
       }
       let commandNameLength = commandGroups.map(commandGroup => commandGroup.paths).flat().map(path => path.split('/').slice(-1)[0].slice(0, -3)).reduce((a, b) => a.length > b.length ? a : b).length
       for (let commandGroup of commandGroups) {
@@ -54,7 +52,8 @@ module.exports = {
     if (command.args.command.length > 1 && cores.includes(command.args.command[0])) {
       core = command.args.command[0]
       command.args.command = command.args.command.slice(1).join('_')
-      if (fs.existsSync(`${__dirname}/../../${core}/command/${command.args.command}.js`)) commandDef = require(`${__dirname}/../../${core}/command/${command.args.command}`)
+      let path = `${commandScript.corePrototypes.find(type => type.name == core).path}/command/${command.args.command}.js`
+      if (fs.existsSync(path)) commandDef = require(path)
     } else {
       command.args.command = command.args.command.join('_')
       if (fs.existsSync(`command/${command.args.command}.js`)) commandDef = require(`${process.cwd()}/command/${command.args.command}`)

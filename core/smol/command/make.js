@@ -1,3 +1,4 @@
+const commandScript = require('../script/command')
 const config = require('../script/config')
 const fs = require('fs')
 
@@ -13,10 +14,8 @@ let loadMakes = dir => {
 let helpItems = {}
 helpItems.Templates = loadMakes(`${__dirname}/../make`)
 if (fs.existsSync(`${process.cwd()}/make`)) helpItems['Custom Templates'] = loadMakes(`${process.cwd()}/make`)
-let cores = fs.readdirSync(`${__dirname}/../..`).filter(core => core != 'smol')
-for (let core of cores) {
-  let coreDescription = require(`${__dirname}/../../${core}/core.json`).description
-  if (fs.existsSync(`${__dirname}/../../${core}/make`)) helpItems[`${coreDescription} (${core})`] = loadMakes(`${__dirname}/../../${core}/make`)
+for (let core of commandScript.corePrototypes) {
+  if (fs.existsSync(`${core.path}/make`)) helpItems[`${core.description} (${core.name}) Templates`] = loadMakes(`${core.path}/make`)
 }
 
 // command definition
