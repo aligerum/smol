@@ -12,9 +12,15 @@ Upon starting the console, each of the project's Cores are started up and provid
 
 See each Core Type's documentation regarding their console integration.
 
+# Plugins
+
+Plugins can also provide functionality by name. For example, the `smol-plugin-user` plugin will be available as `user` within the console.
+
 # Global Packages
 
 The `smol` package and any packages you have installed via `npm` within your project are also available globally, just by accessing them by name. For example, if you install `moment`, you can immediately begin using it by running `moment()` rather than having to first run `const moment = require('moment')`.
+
+Each package is named as camelCase, so the package `smol-core-express` is available `smolCoreExpress` within the console.
 
 # await Keyword
 
