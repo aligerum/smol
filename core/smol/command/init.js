@@ -33,7 +33,7 @@ module.exports = {
 
     // create .gitignore
     if (!fs.existsSync(`${relativePath}/.gitignore`)) command.run(`touch ${relativePath}/.gitignore`)
-    let ignores = ['/config', '/storage']
+    let ignores = ['*.bak', '*.old', '.DS_Store', '/config', 'desktop.ini', 'node_modules', '/output', '/storage', 'Thumbs.db']
     let gitignore = fs.readFileSync(`${relativePath}/.gitignore`, 'utf-8')
     for (let ignore of ignores) if (!gitignore.split('\n').includes(ignore)) gitignore += (gitignore.length && gitignore.slice(-1) != '\n') ? `\n${ignore}` : ignore
     if (gitignore.slice(-1) != '\n') gitignore += '\n'
