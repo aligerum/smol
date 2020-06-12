@@ -1,3 +1,4 @@
+const commandScript = require('../script/command')
 const config = require('../script/config')
 const fs = require('fs')
 
@@ -24,7 +25,7 @@ module.exports = {
     for (let core of cores) {
       if (command.args.template && command.args.template != core) continue
       let coreJson = require(`${process.cwd()}/core/${core}/core.json`)
-      let configPath = `${__dirname}/../../${coreJson.type}/template/config.json`
+      let configPath = `${commandScript.corePrototypes.find(prototype => prototype.name == coreJson.type).path}/template/config.json`
       if (fs.existsSync(configPath)) files.push({from: configPath, to: `${core}.json`})
     }
 
