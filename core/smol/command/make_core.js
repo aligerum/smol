@@ -17,17 +17,29 @@ module.exports = {
     // create directory
     command.run(`mkdir -p ${process.cwd()}/core/${command.args.name}`)
 
+    // add skeleton
+    if (fs.existsSync(`${command.info.type.prototypePath}/skeleton`)) command.run(`cp -R ${command.info.type.prototypePath}/skeleton/. ${process.cwd()}/core/${command.args.name}`)
+
     // create core json
-    let json = {
-      type: command.args.type
-    }
-    fs.writeFileSync(`${process.cwd()}/core/${command.args.name}/core.json`, JSON.stringify(json, null, 2))
+    let jsonPath = `${process.cwd()}/core/${command.args.name}/core.json`
+    let json = fs.existsSync(jsonPath) ? require(jsonPath) : {}
+    json.type = command.args.type
+    json.description = ''
+    json.plugins = []
+    fs.writeFileSync(jsonPath, JSON.stringify(json, null, 2))
+
+    // create config for core
+    command.run(`smol make config ${command.args.name}`)
 
     // output
     console.log(command.colors.green(`Created ${command.args.type} core at core/${command.args.name}`))
 
-    // create config for core
-    command.run(`smol make config ${command.args.name}`)
+    // run add script
+    if (fs.existsSync(`${command.info.type.prototypePath}/add.js`)) {
+      process.env.SMOL_CORE = command.args.name
+      let add = require(`${command.info.type.prototypePath}/add.js`)
+      add.exec()
+    }
 
   }
 }

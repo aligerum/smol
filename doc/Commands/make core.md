@@ -8,3 +8,5 @@ For example:
 $ smol make core express api
 Created express core at core/api
 ```
+
+See the Cores documentation for more information.
