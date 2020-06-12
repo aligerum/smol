@@ -5,6 +5,9 @@ const fs = require('fs')
 let coreTypes = commandScript.corePrototypes.map(type => `${type.name}: ${type.description}`)
 let cores = commandScript.corePrototypes.map(type => type.name)
 
+// get plugins
+let plugins = commandScript.plugins.map(plugin => plugin.name)
+
 module.exports = {
   args: [
     'command?+: Command to show help for',
@@ -13,12 +16,11 @@ module.exports = {
   exec: async command => {
 
     // if just running `smol help`, show all commands
-    if (!command.args.command.length || (command.args.command.length == 1 && cores.includes(command.args.command[0]))) {
+    if (!command.args.command.length || (command.args.command.length == 1 && cores.concat(plugins).includes(command.args.command[0]))) {
       let core
+      let plugin
       if (cores.includes(command.args.command[0])) core = command.args.command[0]
-      console.log(command.colors.yellow('Usage'))
-      if (core) console.log(`  smol <${core}Core> [command] [arguments] [options]`)
-      else console.log('  smol [command] [arguments] [options]')
+      else if (plugins.includes(command.args.command[0])) plugin = command.args.command[0]
       let commandGroups = []
       let getCommands = (heading, dir) => {
         if (!fs.existsSync(dir)) return
@@ -29,13 +31,25 @@ module.exports = {
         if (commandGroup.paths.length) commandGroups.push(commandGroup)
       }
       if (core) {
-        getCommands(`${commandScript.corePrototypes.find(type => type.name == core).description} (${core})`, `${commandScript.corePrototypes.find(type => type.name == core).path}/command`)
+        let corePrototype = commandScript.corePrototypes.find(def => def.name == core)
+        getCommands(`${corePrototype.description} Core (${corePrototype.name})`, `${corePrototype.path}/command`)
+      } else if (plugin) {
+        let pluginPrototype = commandScript.plugins.find(def => def.name == plugin)
+        getCommands(`${pluginPrototype.description} Plugin (${pluginPrototype.name})`, `${pluginPrototype.path}/command`)
       } else {
         getCommands('Commands', __dirname)
         getCommands('Custom Commands', `${process.cwd()}/command`)
-        for (let core of cores) getCommands(`${commandScript.corePrototypes.find(type => type.name == core).description} (${core})`, `${commandScript.corePrototypes.find(type => type.name == core).path}/command`)
+        for (let core of commandScript.corePrototypes) getCommands(`${core.description} Core (${core.name})`, `${core.path}/command`)
+        for (let plugin of commandScript.plugins) getCommands(`${plugin.description} Plugin (${plugin.name})`, `${plugin.path}/command`)
       }
       let commandNameLength = commandGroups.map(commandGroup => commandGroup.paths).flat().map(path => path.split('/').slice(-1)[0].slice(0, -3)).reduce((a, b) => a.length > b.length ? a : b).length
+      for (let commandGroup of commandGroups) {
+        for (let path of commandGroup.paths) require(path)
+      }
+      console.log(command.colors.yellow('Usage'))
+      if (core) console.log(`  smol <${core}Core> [command] [arguments] [options]`)
+      else if (plugin) console.log(`  smol ${plugin} [command] [arguments] [options]`)
+      else console.log('  smol [command] [arguments] [options]')
       for (let commandGroup of commandGroups) {
         console.log(command.colors.yellow(`\n${commandGroup.heading}`))
         for (let path of commandGroup.paths) {
@@ -49,10 +63,16 @@ module.exports = {
     // show help for specific command
     let commandDef
     let core
+    let plugin
     if (command.args.command.length > 1 && cores.includes(command.args.command[0])) {
       core = command.args.command[0]
       command.args.command = command.args.command.slice(1).join('_')
       let path = `${commandScript.corePrototypes.find(type => type.name == core).path}/command/${command.args.command}.js`
+      if (fs.existsSync(path)) commandDef = require(path)
+    } else if (command.args.command.length > 1 && plugins.includes(command.args.command[0])) {
+      plugin = command.args.command[0]
+      command.args.command = command.args.command.slice(1).join('_')
+      let path = `${commandScript.plugins.find(type => type.name == plugin).path}/command/${command.args.command}.js`
       if (fs.existsSync(path)) commandDef = require(path)
     } else {
       command.args.command = command.args.command.join('_')
@@ -68,6 +88,7 @@ module.exports = {
     // show help
     let usage = `  smol `
     if (core) usage += `<${core}Core> `
+    else if (plugin) usage += `${plugin} `
     usage += command.args.command.replace(/_/, ' ')
     if (argDefs.arguments.length) for (let arg of argDefs.arguments) usage += ` ${arg.isRequired ? '<' + arg.name + '>': '[' + arg.name + ']'}`
     if (argDefs.flags.length || argDefs.options.length) usage += ` [options]`
@@ -102,8 +123,18 @@ module.exports = {
         if (tags.length) line += arg.description ? ` (${tags.join(', ')})` : `(${tags.join(', ')})`
         if (addedLines.length) addedLines.forEach(addedLine => line += `\n${' '.repeat(argNameLength)}    ${addedLine}`)
         if (arg.allowedValues && arg.allowedValues.length) {
-          if (arg.type == 'coreType' || (commandDef.argValues && commandDef.argValues[arg.name])) {
-            let values = arg.type == 'coreType' ? coreTypes : commandDef.argValues[arg.name]
+          if (['core', 'coreType'].includes(arg.type) || (commandDef.argValues && commandDef.argValues[arg.name])) {
+            let values
+            if (arg.type == 'core') {
+              values = arg.allowedValues.map(coreName => {
+                let coreJson = require(`${process.cwd()}/core/${coreName}/core.json`)
+                return `${coreName}: ${coreJson.description || commandScript.corePrototypes.find(type => type.name == coreJson.type).description}`
+              })
+            } else if (arg.type == 'coreType') {
+              values = coreTypes
+            } else {
+              values = commandDef.argValues[arg.name]
+            }
             for (let val of values) line += `\n  ${''.padEnd(argNameLength, ' ')}    ${command.colors.dim(val.split(':')[0].padEnd(valNameLength, ' '))}  ${(val.split(':')[1] || '').trim()}`
           } else {
             line += `\n  ${''.padEnd(argNameLength, ' ')}    ${arg.allowedValues.map(val => command.colors.dim(val)).join(', ')}`
@@ -138,8 +169,18 @@ module.exports = {
         if (tags.length) line += option.description ? ` (${tags.join(', ')})` : `(${tags.join(', ')})`
         if (addedLines.length) addedLines.forEach(addedLine => line += `\n${' '.repeat(argNameLength)}    ${addedLine}`)
         if (option.allowedValues && option.allowedValues.length) {
-          if (option.type == 'coreType' || (commandDef.argValues && commandDef.argValues[option.name])) {
-            let values = option.type == 'coreType' ? coreTypes : commandDef.argValues[option.name]
+          if (['core', 'coreType'].includes(option.type) || (commandDef.argValues && commandDef.argValues[option.name])) {
+            let values
+            if (option.type == 'core') {
+              values = option.allowedValues.map(coreName => {
+                let coreJson = require(`${process.cwd()}/core/${coreName}/core.json`)
+                return `${coreName}: ${coreJson.description || commandScript.corePrototypes.find(type => type.name == coreJson.type).description}`
+              })
+            } else if (option.type == 'coreType') {
+              values = coreTypes
+            } else {
+              values = commandDef.argValues[arg.name]
+            }
             for (let val of values) line += `\n  ${''.padEnd(argNameLength, ' ')}    ${command.colors.dim(val.split(':')[0].padEnd(valNameLength, ' '))}  ${(val.split(':')[1] || '').trim()}`
           } else {
             line += `\n  ${''.padEnd(argNameLength, ' ')}    ${option.allowedValues.map(val => command.colors.dim(val)).join(', ')}`
