@@ -161,8 +161,24 @@ For example, if you have 10 things set to run at 1:00pm and the 5 things that ha
 
 The `schedule` object also has the following in common with the `command` object used in commands: `ask`, `confirm`, `colors`, `run`, `runAsync`, `spawn` (see Commands doc).
 
+It's important to use the time provided by `schedule.time`, as the user may run a simulated time (see below).
+
 # Core Schedules
 
 Just as with commands, you can create schedules for specific cores by running `smol make <coreName> schedule <scheduleName>`. These will be stored in `core/<coreName>/schedule`.
 
 The `schedule` object passed to `exec` would then have a `core` key just like when running commands (see Commands doc).
+
+# Manually Running and Simulating Times
+
+You can manually run individual schedules by running `smol schedule run <scheduleName>`. This will run regardless of whether it is time for the schedule to run, and ignores maintenance mode. It does however, respect overlap rules.
+
+To simulate a specific time, you can use the `--time` option:
+
+```
+$ smol schedule run --time="2020-01-01 00:00:00"
+```
+
+This will run all schedules as if it's that time. Their schedule objects will be passed a `moment` object with the input time. This will also respect order just as if the schedule were running at that time.
+
+This is very useful for development so you don't have to wait for a specific time to test a schedule, and you can view the console output of the schedule's exec function.

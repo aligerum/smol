@@ -34,7 +34,7 @@ module.exports = {
     '--time=: Time to simulate as a date string, ex: "2020-01-01 00:00:00"',
   ],
   help: {
-    Notes: 'Calling run with no schedule specified calls all schedules respecting order/time/overlap/disabled/maintenanceMode\nCalling run on a specific schedule runs individual schedule regardless of time/overlap/disabled/maintenanceMode\nCalling enable/disable with no schedule specified enables/disables the scheduler itself',
+    Notes: 'Calling run with no schedule specified calls all schedules respecting order/time/disabled/maintenanceMode\nCalling run on a specific schedule runs individual schedule regardless of time/disabled/maintenanceMode\nCalling enable/disable with no schedule specified enables/disables the scheduler itself',
   },
   argValues: {
     action: [
