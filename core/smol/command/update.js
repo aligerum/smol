@@ -43,15 +43,15 @@ module.exports = {
 
       // pull files from git
       console.log(command.colors.yellow('Pulling updates from git...'))
-      // command.run('git pull')
+      command.run('git pull')
 
       // install npm packages
       console.log(command.colors.yellow('Installing and updating npm packages...'))
-      // command.run('npm install')
+      command.run('npm install')
 
       // add configs
       console.log(command.colors.yellow('Generating and updating configs...'))
-      // command.run('npx smol make config')
+      command.run('npx smol make config')
 
       // run core functions
       for (let corePrototype of commandScript.corePrototypes) {
@@ -59,13 +59,13 @@ module.exports = {
         let coreNames = []
         if (fs.existsSync(`${process.cwd()}/core`)) coreNames = fs.readdirSync(`${process.cwd()}/core`).filter(coreName => require(`${process.cwd()}/core/${coreName}/core.json`).type == corePrototype.name)
         for (let coreName of coreNames) {
-          // await require(`${corePrototype.path}/update`).exec({
-          //   coreNames,
-          //   run: commandScript.run,
-          //   runAsync: commandScript.runAsync,
-          //   spawn: commandScript.spawn,
-          //   colors: command.colors,
-          // })
+          await require(`${corePrototype.path}/update`).exec({
+            coreNames,
+            run: commandScript.run,
+            runAsync: commandScript.runAsync,
+            spawn: commandScript.spawn,
+            colors: command.colors,
+          })
         }
       }
 
@@ -80,13 +80,13 @@ module.exports = {
           })
         }
         for (let coreName of coreNames) {
-          // await require(`${plugin.path}/update`).exec({
-          //   coreNames,
-          //   run: commandScript.run,
-          //   runAsync: commandScript.runAsync,
-          //   spawn: commandScript.spawn,
-          //   colors: command.colors,
-          // })
+          await require(`${plugin.path}/update`).exec({
+            coreNames,
+            run: commandScript.run,
+            runAsync: commandScript.runAsync,
+            spawn: commandScript.spawn,
+            colors: command.colors,
+          })
         }
       }
 
