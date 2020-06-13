@@ -29,3 +29,18 @@ You can convert any string into a url string for use as a slug by calling `smol.
 ```js
 smol.string.slug('Some Article Title! (Part 20)') // outputs: some-article-title-part-20
 ```
+
+# Replace
+
+`smol.replace` is used to replace multiple items within a file based on regex. Each key is a case-sensitive string used to create a regex pattern, and each value is the replacement for that value.
+
+```js
+let greeting = "Hello person! You're using appName!"
+let newGreeting = smol.string.replace(greeting, {
+  person: 'John',
+  appName: 'CoolApp',
+})
+// newGreeting: Hello John! You're using CoolApp!
+```
+
+Note that the keys are used to create regex, so symbols, character classes, etc. apply.
