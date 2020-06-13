@@ -4,11 +4,9 @@ let schedule = require(`${process.argv[2]}`)
 let moment = require('moment')
 
 let scheduleObject = {
-  ask: command.ask,
   run: command.run,
   runAsync: command.runAsync,
   spawn: command.spawn,
-  confirm: command.confirm,
   colors,
   time: moment(process.argv[3]),
 }

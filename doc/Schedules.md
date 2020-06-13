@@ -159,7 +159,7 @@ The schedule object has a `time` key which stores a `moment` object describing t
 
 For example, if you have 10 things set to run at 1:00pm and the 5 things that have order 0 take 10 minutes to complete, `schedule.time` will still be 1:00pm, not 1:10pm.
 
-The `schedule` object also has the following in common with the `command` object used in commands: `ask`, `confirm`, `colors`, `run`, `runAsync`, `spawn` (see Commands doc).
+The `schedule` object also has the following in common with the `command` object used in commands: `colors`, `run`, `runAsync`, `spawn` (see Commands doc). Note that `ask` and `confirm` are not included as there is no user interactivity.
 
 It's important to use the time provided by `schedule.time`, as the user may run a simulated time (see below).
 
