@@ -2,12 +2,23 @@
   "name": "smol",
   "version": "0.1.0",
   "description": "A very smol web app framework",
-  "main": "index.js",
+  "main": "main.js",
+  "browser": "browser.js",
   "bin": "cli.js",
-  "keywords": ["framework", "microservice", "web app"],
+  "keywords": [
+    "framework",
+    "microservice",
+    "web app"
+  ],
   "author": "Allister Aligerum",
   "repository": "github:aligerum/smol",
   "homepage": "https://smol.aligerum.io",
   "bugs": "allister@aligerum.io",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "cryptr": "^6.0.2",
+    "md5": "^2.2.1",
+    "moment": "^2.26.0"
+  }
 }
