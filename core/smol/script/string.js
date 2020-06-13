@@ -70,6 +70,7 @@ let studlyCase = s => {
 module.exports = {
   camelCase,
   endsWith,
+  generate,
   kabobCase,
   replace,
   slug,
