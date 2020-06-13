@@ -1,6 +1,12 @@
 {
   "mode": "development",
   "appName": "App",
+  "maintenanceMode": false,
   "historyPath": "storage/console/history",
-  "editor": "atom"
+  "browser": "google-chrome",
+  "editor": "atom",
+  "encryptionKey": "",
+  "scheduleEnabled": false,
+  "disabledSchedules": [],
+  "runningSchedulePath": "storage/schedule/running"
 }

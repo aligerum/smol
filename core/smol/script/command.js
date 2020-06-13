@@ -1,23 +1,38 @@
 const child_process = require('child_process')
 const colors = require('./colors')
+const config = require('./config')
 const fs = require('fs')
+const readline = require('readline')
 const string = require('./string')
+const util = require('util')
 
-// determine core prototypes
+// determine core prototypes and plugins
 let corePrototypes = []
-let packageJson = require(`${process.cwd()}/package.json`)
-for (let jsonKey of ['dependencies', 'devDependencies']) {
-  if (packageJson[jsonKey]) {
-    corePrototypes = corePrototypes.concat(Object.keys(packageJson[jsonKey]).filter(key => key.startsWith('smol-core-')).map(key => {
-      return {name: key.slice(10), path: packageJson[jsonKey][key]}
-    }))
+let plugins = []
+if (fs.existsSync('package.json')) {
+  let packageJson = require(`${process.cwd()}/package.json`)
+  for (let jsonKey of ['dependencies', 'devDependencies']) {
+    if (packageJson[jsonKey]) {
+      corePrototypes = corePrototypes.concat(Object.keys(packageJson[jsonKey]).filter(key => key.startsWith('smol-core-')).map(key => {
+        return {name: key.slice(10), path: packageJson[jsonKey][key]}
+      }))
+      plugins = plugins.concat(Object.keys(packageJson[jsonKey]).filter(key => key.startsWith('smol-plugin-')).map(key => {
+        return {name: key.slice(12), path: packageJson[jsonKey][key]}
+      }))
+    }
   }
-}
-for (let corePrototype of corePrototypes) {
-  if (corePrototype.path.slice(0, 1) == '.') corePrototype.path = `${process.cwd()}/${corePrototype.path}`
-  if (corePrototype.path.slice(0, 1) != '/' && corePrototypePath.slice(1, 2) != ':') corePrototype.path = `${process.cwd()}/node_modules/${corePrototype.path}`
-  let coreJson = require(`${corePrototype.path}/core.json`)
-  corePrototype.description = coreJson.description
+  for (let corePrototype of corePrototypes) {
+    if (corePrototype.path.slice(0, 1) == '.') corePrototype.path = `${process.cwd()}/${corePrototype.path}`
+    if (corePrototype.path.slice(0, 1) != '/' && corePrototype.path.slice(1, 2) != ':') corePrototype.path = `${process.cwd()}/node_modules/${corePrototype.path}`
+    let coreJson = require(`${corePrototype.path}/core.json`)
+    corePrototype.description = coreJson.description
+  }
+  for (let plugin of plugins) {
+    if (plugin.path.slice(0, 1) == '.') plugin.path = `${process.cwd()}/${plugin.path}`
+    if (plugin.path.slice(0, 1) != '/' && plugin.path.slice(1, 2) != ':') plugin.path = `${process.cwd()}/node_modules/${plugin.path}`
+    let pluginJson = require(`${plugin.path}/plugin.json`)
+    plugin.description = pluginJson.description
+  }
 }
 
 // run command
@@ -25,12 +40,19 @@ let exec = async args => {
 
   // determine core names
   let core = 'smol'
-  if (fs.existsSync(`${process.cwd()}/core`)) {
+  let coreName = core
+  let plugin
+  if (plugins.find(def => def.name == args[0])) {
+    plugin = args[0]
+    args = args.slice(1)
+  } else if (fs.existsSync(`${process.cwd()}/core`)) {
     let coreNames = fs.readdirSync(`${process.cwd()}/core`)
     if (coreNames.includes(args[0])) {
       let coreJson = require(`${process.cwd()}/core/${args[0]}/core.json`)
+      coreName = args[0]
       core = coreJson.type
       args = args.slice(1)
+      process.env.SMOL_CORE = coreName
     }
   }
 
@@ -41,7 +63,8 @@ let exec = async args => {
     let paths = [
       `${process.cwd()}/command/${commandName}.js`,
     ]
-    if (core == 'smol') paths.push(`${__dirname}/../command/${commandName}.js`)
+    if (plugin) paths.push(`${plugins.find(def => def.name == plugin).path}/command/${commandName}.js`)
+    else if (core == 'smol') paths.push(`${__dirname}/../command/${commandName}.js`)
     else paths.push(`${corePrototypes.find(type => type.name == core).path}/command/${commandName}.js`)
     for (let path of paths) {
       if (fs.existsSync(path)) {
@@ -61,10 +84,11 @@ let exec = async args => {
 
   // create command
   let command = {
-    // ask: this.ask,
+    ask,
     colors,
-    // confirm: this.confirm,
+    confirm,
     run,
+    runAsync,
     spawn,
   }
   let argDefs = parseArguments(commandDef, args)
@@ -74,6 +98,13 @@ let exec = async args => {
   }
   command.args = argDefs.values
   command.info = argDefs.info
+  if (!plugin && coreName != 'smol') {
+    command.core = {
+      name: coreName,
+      coreConfig: config(coreName),
+      corePath: `${process.cwd()}/core/${coreName}`,
+    }
+  }
 
   // run command
   await commandDef.exec(command)
@@ -352,8 +383,38 @@ let parseArguments = (commandDef, inputArgs) => {
 
 }
 
+// prompt with a question
+let ask = async question => {
+
+  // create readline interface
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  })
+
+  // promisify readline question function
+  rl.question[util.promisify.custom] = question => new Promise(resolve => rl.question(question, resolve))
+
+  // ask question
+  let answer = await util.promisify(rl.question)(`${question} `)
+  rl.close()
+
+  // return answer
+  return answer
+
+}
+
+// ask for yes or y
+let confirm = async question => {
+  let answer = await ask(question)
+  return ['yes', 'y'].includes(answer.toLowerCase())
+}
+
 // run a command
 let run = (command, options={stdio: 'inherit'}) => child_process.execSync(command, options)
+
+// run a command asynchronously
+let runAsync = async (command, options={stdio: 'inherit'}) => util.promisify(child_process.exec)(command, options)
 
 // spawn a command to run separately from main process
 let spawn = command => {
@@ -364,7 +425,13 @@ let spawn = command => {
 
 // export
 module.exports = {
+  ask,
+  confirm,
   corePrototypes,
   exec,
   parseArguments,
+  plugins,
+  run,
+  runAsync,
+  spawn,
 }

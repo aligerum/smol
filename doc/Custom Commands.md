@@ -765,13 +765,29 @@ Available styles: `bright`, `dim`, `underline`, `blink`, `reverse`, `hidden`.
 
 Colors and styles can be mixed by putting the functions inside each other: `command.colors.red(command.colors.bright('Something went very wrong!'))`.
 
-# Run, Spawn
+# Run, RunAsync, Spawn
 
-Because it's a common need to run external programs from the command line, `run` and `spawn` function are provided. These are simply the `execSync` and `spawn` functions already provided by node's child_process object.
+Because it's a common need to run external programs from the command line, `run`, `runAsync` and `spawn` function are provided. These are simply the `execSync`, `exec` and `spawn` functions already provided by node's child_process object.
 
 Use `command.run` to run external scripts synchronously. You can pass in and options object as the second argument in the same way you could pass it into `execSync`. For example, `command.run('mkdir -p some/path', {stdio: 'ignore'})`.
 
 Use `command.spawn` to create a subprocess that runs independently of the main process (returns the subprocess object returned by `child_process.spawn`). Unlike `child_process.spawn`, you can pass in arguments as a single string, rather than an array. For example: `command.spawn('watch -n1 dmesg')`.
+
+# Ask, Confirm
+
+For command line tasks that require user interaction, the `ask` and `confirm` functions are provided.
+
+Use `command.ask` to get input from the user:
+
+```js
+let name = command.ask('What is your name?')
+```
+
+Use `command.confirm` to get a true or false value from a prompt based on if the user types `y` or `yes`.
+
+```js
+if (command.confirm(command.colors.red(`Are you sure you want to delete this?`))) deleteStuff()
+```
 
 # Command Names
 
@@ -780,3 +796,13 @@ Command names are generally single values, but there are instances in which you 
 To make a multi-value command name, use quotes or underscores, for example `smol make command do_stuff` and `smol make command "do stuff"` with both create `command/do_stuff.js` which will be called when you run `smol do stuff`.
 
 Having multi-value commands is useful for avoiding conflicts with existing commands and for adding custom arguments and options for specific commands.
+
+# Core Commands
+
+You can create a command that runs within the context of a specific core by running `smol make <coreName> command <commandName>`. For example, we could make a `logActiveConnections` command that creates a snapshot of the number of open socket connections to the api using `smol make api command logActiveConnections`. This command would be stored in `core/api/command/logActiveConnections`.
+
+When running a command within the core, the `command` object passed to `exec` will have a `core` key with the following values:
+
+- name: "api"
+- coreConfig: (that cores config as an object)
+- corePath: "/path/to/project/core/api"
