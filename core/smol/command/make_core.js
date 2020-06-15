@@ -18,7 +18,10 @@ module.exports = {
     command.run(`mkdir -p ${process.cwd()}/core/${command.args.name}`)
 
     // add skeleton
-    if (fs.existsSync(`${command.info.type.prototypePath}/skeleton`)) command.run(`cp -R ${command.info.type.prototypePath}/skeleton/. ${process.cwd()}/core/${command.args.name}`)
+    if (fs.existsSync(`${command.info.type.prototypePath}/skeleton`)) {
+      command.run(`cp -R ${command.info.type.prototypePath}/skeleton/. ${process.cwd()}/core/${command.args.name}`)
+      command.run(`find ${process.cwd()}/core/${command.args.name} -name .remove -delete`)
+    }
 
     // create core json
     let jsonPath = `${process.cwd()}/core/${command.args.name}/core.json`
