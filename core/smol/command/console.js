@@ -38,7 +38,7 @@ module.exports = {
       let consolePath = `${commandScript.corePrototypes.find(corePrototype => corePrototype.name == coreJson.type).path}/console.js`
       if (!fs.existsSync(consolePath)) continue
       let coreLoader = require(consolePath)
-      coreLoader(context[core], context)
+      coreLoader(core, context[core], context)
     }
 
     // load plugin functionality
