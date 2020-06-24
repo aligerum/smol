@@ -1,4 +1,5 @@
 const fs = require('fs')
+const string = require('../script/string')
 
 module.exports = {
   description: 'Make a new core',
@@ -27,6 +28,7 @@ module.exports = {
     let jsonPath = `${process.cwd()}/core/${command.args.name}/core.json`
     let json = fs.existsSync(jsonPath) ? require(jsonPath) : {}
     json.type = command.args.type
+    json.displayName = string.spaceCase(command.args.name)
     json.description = ''
     json.plugins = []
     fs.writeFileSync(jsonPath, JSON.stringify(json, null, 2))
