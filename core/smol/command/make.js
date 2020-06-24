@@ -67,15 +67,19 @@ module.exports = {
         isSkipped: false,
         isOverwritten: false,
         isExample: command.args.example && file.fromExample,
-        name: command.args.core ? `core/${command.args.core}/${relativeTarget}` : relativeTarget,
+        name: relativeTarget,
         path: target,
+      }
+      if (command.args.core) {
+        if (newFile.name.slice(0, 5) == '../..') newFile.name = newFile.name.slice(6)
+        else newFile.name = `core/${command.args.core}/${newFile.name}`
       }
       files.push(newFile)
       if (fs.existsSync(target) && !command.args.force) {
         newFile.isSkipped = true
         continue
       }
-      command.run(`mkdir -p ${target.split('/').slice(0, -1).join('/')}`)
+      command.run(`mkdir -p "${target.split('/').slice(0, -1).join('/')}"`)
       if (fs.existsSync(target)) newFile.isOverwritten = true
       fs.writeFileSync(target, fileContents)
     }
