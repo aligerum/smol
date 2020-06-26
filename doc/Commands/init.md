@@ -6,6 +6,7 @@ To initialize an existing directory, run `smol init` within the directory. This 
 - install `smol` npm package if not present
 - run `git init` if not already initialized
 - create `.gitignore` to ignore unversioned directories such as `config/`
+- create base config file
 
 If you would like to also create the directory, you may enter the new path. Example: `smol init myProject`.
 

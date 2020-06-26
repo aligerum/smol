@@ -49,6 +49,10 @@ module.exports = {
       command.run(`cd ${relativePath} && npm i github:aligerum/smol`, {stdio: 'ignore'})
     }
 
+    // create config
+    console.log('Creating config...')
+    command.run(`cd ${relativePath} && npx smol make config`, {stdio: 'ignore'})
+
     // success
     console.log(command.colors.green('Created a very smol project'))
 
