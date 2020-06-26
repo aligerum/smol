@@ -23,7 +23,7 @@ if (fs.existsSync('package.json')) {
   }
   for (let corePrototype of corePrototypes) {
     if (corePrototype.path.slice(0, 1) == '.') corePrototype.path = `${process.cwd()}/${corePrototype.path}`
-    if (corePrototype.path.slice(0, 1) != '/' && corePrototype.path.slice(1, 2) != ':') corePrototype.path = `${process.cwd()}/node_modules/${corePrototype.path}`
+    if (corePrototype.path.slice(0, 1) != '/' && corePrototype.path.slice(1, 2) != ':') corePrototype.path = `${process.cwd()}/node_modules/${corePrototype.path.split('/').slice(-1).join('').split(':').slice(-1).join('')}`
     let coreJson = require(`${corePrototype.path}/core.json`)
     corePrototype.description = coreJson.description
   }
