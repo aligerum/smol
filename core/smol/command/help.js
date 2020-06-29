@@ -179,7 +179,7 @@ module.exports = {
             } else if (option.type == 'coreType') {
               values = coreTypes
             } else {
-              values = commandDef.argValues[arg.name]
+              values = commandDef.argValues[option.name]
             }
             for (let val of values) line += `\n  ${''.padEnd(argNameLength, ' ')}    ${command.colors.dim(val.split(':')[0].padEnd(valNameLength, ' '))}  ${(val.split(':')[1] || '').trim()}`
           } else {
