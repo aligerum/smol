@@ -10,7 +10,7 @@ smol is a lot of things, but mainly, it's a project management toolchain for qui
 
 - Easy to use and extend command-line interface to aid in development
 - Powerful scheduler
-- "Core" system which break the app into independently hosted and scaled cores such as frontend, api, and database
+- "Core" system which breaks the app into independently hosted and scaled cores such as frontend, api, and database
 - Plugin system to easily add functionality to existing cores
 - Configuration system to easily configure and deploy code
 - "Make" system which provides easy file creation using templates
