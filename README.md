@@ -1,3 +1,5 @@
+![smol image](./core/smol/image/icon.png)
+
 # smol
 
 A very smol web app framework.
