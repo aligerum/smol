@@ -1,14 +1,16 @@
-![smol image](./core/smol/image/icon.png)
+<p align="center">
+<img src="./core/smol/image/icon_256.png">
+</p>
 
 # smol
 
 A very smol web app framework.
 
-# What is smol
+smol is a lot of things, but mainly, it's a project management toolchain for quickly and easily creating and deploying apps. Some features:
 
-smol is a lot of things, but mainly, it's a project management toolchain for quickly and easily creating and deploying apps. It accomplishes this by:
-
-- providing an easy to use and extend command-line interface to aid in development and can also be used by a scheduler
-- breaking the app up into common use-case cores such as a frontend, api, and database
-- allowing each core to be hosted and scaled independently
-- providing robust configuration for easy deployment
+- Easy to use and extend command-line interface to aid in development
+- Powerful scheduler
+- "Core" system which break the app into independently hosted and scaled cores such as frontend, api, and database
+- Plugin system to easily add functionality to existing cores
+- Configuration system to easily configure and deploy code
+- "Make" system which provides easy file creation using templates
