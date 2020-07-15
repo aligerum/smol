@@ -28,7 +28,7 @@ module.exports = {
     // init git
     if (!fs.existsSync(`${relativePath}/.git`)) {
       console.log('Initializing git repo...')
-      command.run('cd ${relativePath} && git init', {stdio: 'ignore'})
+      command.run(`cd ${relativePath} && git init`, {stdio: 'ignore'})
     }
 
     // create .gitignore
