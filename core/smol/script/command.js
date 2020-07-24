@@ -14,22 +14,18 @@ if (fs.existsSync('package.json')) {
   for (let jsonKey of ['dependencies', 'devDependencies']) {
     if (packageJson[jsonKey]) {
       corePrototypes = corePrototypes.concat(Object.keys(packageJson[jsonKey]).filter(key => key.startsWith('smol-core-')).map(key => {
-        return {name: key.slice(10), path: packageJson[jsonKey][key]}
+        return {name: key.slice(10), path: `${process.cwd()}/node_modules/${key}`}
       }))
       plugins = plugins.concat(Object.keys(packageJson[jsonKey]).filter(key => key.startsWith('smol-plugin-')).map(key => {
-        return {name: key.slice(12), path: packageJson[jsonKey][key]}
+        return {name: key.slice(12), path: `${process.cwd()}/node_modules/${key}`}
       }))
     }
   }
   for (let corePrototype of corePrototypes) {
-    if (corePrototype.path.slice(0, 1) == '.') corePrototype.path = `${process.cwd()}/${corePrototype.path}`
-    if (corePrototype.path.slice(0, 1) != '/' && corePrototype.path.slice(1, 2) != ':') corePrototype.path = `${process.cwd()}/node_modules/${corePrototype.path.split('/').slice(-1).join('').split(':').slice(-1).join('')}`
     let coreJson = require(`${corePrototype.path}/core.json`)
     corePrototype.description = coreJson.description
   }
   for (let plugin of plugins) {
-    if (plugin.path.slice(0, 1) == '.') plugin.path = `${process.cwd()}/${plugin.path}`
-    if (plugin.path.slice(0, 1) != '/' && plugin.path.slice(1, 2) != ':') plugin.path = `${process.cwd()}/node_modules/${plugin.path}`
     let pluginJson = require(`${plugin.path}/plugin.json`)
     plugin.description = pluginJson.description
   }
